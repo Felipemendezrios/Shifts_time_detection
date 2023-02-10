@@ -27,14 +27,13 @@ dir.create(file.path(dir_proj, dir_results),showWarnings = FALSE)
 
 # create directories for BaM results:
 dir.segmentation      = file.path(dir_proj,dir_BaM)
-
 dir.segment.gaug      = file.path(dir_proj,dir_results) # dir. with the results of gauging segmentation
-
-setwd(dir = dir_sources)
+dir.sources      = file.path(dir_proj,dir_sources)
+  
+setwd(dir = dir.sources)
 
 # Functions:
 source("Functions_segmentation.R")
-
 
 setwd(dir_data)
 
@@ -78,7 +77,8 @@ remnant_temp <- list(remnantErrorModel(funk = "Constant",
 ###################
 
 # for(id_dataset in 1:length(datasets)){
-for(id_dataset in 2:2){
+id_dataset <- 2
+
   # Monitor computing time 
   T1<-Sys.time()
   
@@ -186,7 +186,7 @@ for(id_dataset in 2:2){
         residual_seg <- vector(mode = 'list',length = npar)
         
         if(nS>1){
-          tstart <- prior_ini_guess_tau(XP=XP,nS=nS)
+          tstart <- prior_tau_ini(XP=XP,nS=nS)
         }
         
         for(j in 1:npar){
@@ -222,7 +222,7 @@ for(id_dataset in 2:2){
                                     tmin_xtra,
                                     nmin_xtra,
                                     option_xtra)
-        )
+                           )
         
         mod=model(fname='Config_Model.txt',
                   ID='Segmentation',
@@ -257,66 +257,18 @@ for(id_dataset in 2:2){
         mcmc.segm    <- read.table(file=paste0(dir.segmentation,"/Results_Cooking.txt"),header=TRUE)
         resid.segm   <- read.table(file=paste0(dir.segmentation,"/Results_Residuals.txt"),header=TRUE)
         summary.segm <- read.table(file=paste0(dir.segmentation,"/Results_Summary.txt"),header=TRUE)
-        
-        density_plot_iter <- densityPlot(mcmc.segm)
-        gridExtra::grid.arrange(grobs=density_plot_iter,ncol=2)
-        
+
         #=======================#
         #end of segmentation
         #=======================#
-        
         #*****************************************************
         # COMPUTATION OF CRITERIA FOR OPTIMAL MODEL SELECTION:
         #*****************************************************
+        DIC_calcul <- DIC_estimation(mcmc.segm,nS)
+        df.mcmc.LL <- DIC_calcul[[1]]
+        DIC [i] <- DIC_calcul[[2]]
         
-        # LogPosterior simulations:
-        logpost           = as.vector(unlist(rev(mcmc.segm)[1]))
-        
-        # Number of mcmc simulations:
-        len.mcmc          = length(mcmc.segm[,1])
-        
-        # LogPriors of segments means parameters "mu" 
-        priors.mu         = matrix(NA, nrow = len.mcmc, ncol = nS)
-        
-        for (j in 1:nS) {  # Case FlatPrior+
-          priors.mu[,j]  = log(1)
-        }
-        
-        # LogPriors of change point times "tau" (= 0 since it's a flat distribution)
-        if (nS > 1) {
-          priors.tau = matrix(0, nrow =len.mcmc, ncol = nS-1)
-        } else {
-          priors.tau = matrix(0, nrow = len.mcmc, ncol = 1)
-        }
-        
-        # Specify LogPriors for the Remnant Uncertainty:
-        # User can choose if accounting or not for uncertainty (check Options file):
-        priors.gamma = 0
-        priors.gamma = dunif(mcmc.segm[,2*nS],
-                             min = remnant_unc[1], 
-                             max = remnant_unc[2], log = TRUE)
-        # Compute LogPrior as sum of LogPriors of tau parameters (change point times) and mu parameters (segments means):  
-        logprior = 0
-        for (ll in 1:len.mcmc){
-          logprior[ll] = sum(priors.mu[ll,]) + sum(priors.tau[ll,])  + priors.gamma[ll]   
-        }
-        # Compute LogLikelihood as difference between LogPosterior and LogPrior (Bayes' theorem):
-        loglikelihood = logpost - logprior
-        # Save LogLikelihoo, LogPrior and LogPosterior into a dataframe a save it to a .csv file in the iteration folder:
-        df.mcmc.LL = data.frame(loglikelihood = loglikelihood, logprio = logprior, logposterior  = logpost)
         write.table(df.mcmc.LL, file=paste0(dir.nS,"/likelihood_","it",seg.iter,"_","nS",nS,".txt"), sep="\t",row.names = F)
-        
-        
-        # Compute the Maximum LogLikelihood and the maximum LogPosterior, and their variances:
-        maxpost[nS]          = max(logpost)
-        maxLikelihood[nS]    = max(loglikelihood)
-        Likelihood.maxpost   = loglikelihood[which.max(logpost)]
-        varLogpost[nS]       = var(logpost)
-        varLogLikelihood[nS] = var(loglikelihood)
-        #MeanDev             =-2*mean(logpost)
-        MeanDev              = -2*mean(loglikelihood)
-        
-        DIC[i]  =  MeanDev + 2*varLogLikelihood[nS]   #ref: Gelman 2004 "Bayesian data analysis"
         
         i = i+1
       }
