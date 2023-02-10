@@ -76,8 +76,7 @@ remnant_temp <- list(remnantErrorModel(funk = "Constant",
 # start iterations:
 ###################
 
-# for(id_dataset in 1:length(datasets)){
-id_dataset <- 2
+for(id_dataset in 1:length(datasets)){
 
   # Monitor computing time 
   T1<-Sys.time()
@@ -157,10 +156,9 @@ id_dataset <- 2
     
     # criteria for model selection:
     DIC=0;
-    npar =0; maxpost = 0; varLogpost=0; loglikelihood = 0;  maxLikelihood = 0; varLogLikelihood=0;
-    tstart = 0    # Improve starting values
-    
-    #Number of observations:
+    npar =0; 
+   
+     #Number of observations:
     N = length(YP) 
     
     # Perform the segmentation only if there are at least 3 data,
@@ -264,6 +262,7 @@ id_dataset <- 2
         #*****************************************************
         # COMPUTATION OF CRITERIA FOR OPTIMAL MODEL SELECTION:
         #*****************************************************
+
         DIC_calcul <- DIC_estimation(mcmc.segm,nS)
         df.mcmc.LL <- DIC_calcul[[1]]
         DIC [i] <- DIC_calcul[[2]]
@@ -276,6 +275,7 @@ id_dataset <- 2
       DIC_export <- rbind(DIC)
       colnames(DIC_export) <- c("ns1","nS2") 
       write.table(DIC_export,file=file.path(dir.seg.iter,'DIC.txt'),sep="\t",col.names = TRUE, row.names = F)
+     
       #*******************************************************************************************************
       # Analysis of segmentation results for this period:
       #*******************************************************************************************************
