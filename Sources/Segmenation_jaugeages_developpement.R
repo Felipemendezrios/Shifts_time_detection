@@ -15,7 +15,7 @@ library(ggplot2)
 
 dir_proj <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection')
 dir_data <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection/Datasets')
-dir_BaM <- c('BaM_semgentation')
+dir_BaM <- c('BaM_segmentation')
 dir_results <- c('Segmentation_results')
 
 # create directories 
