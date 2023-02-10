@@ -13,19 +13,20 @@ if(length(new_packages)) install.packages(new_packages)
 library(RBaM)
 library(ggplot2)
 
-dir_data <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/Taches/BayDERS/BayDERS_operationnel/Exercice_benjamin')
+dir_proj <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection')
+dir_data <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection/Datasets')
 dir_BaM <- c('BaM_semgentation')
 dir_results <- c('Segmentation_results')
 
 # create directories 
 
-dir.create(file.path(dir_data, dir_BaM),showWarnings = FALSE)
-dir.create(file.path(dir_data, dir_results),showWarnings = FALSE)
+dir.create(file.path(dir_proj, dir_BaM),showWarnings = FALSE)
+dir.create(file.path(dir_proj, dir_results),showWarnings = FALSE)
 
 # create directories for BaM results:
-dir.segmentation      = file.path(dir_data,dir_BaM)
+dir.segmentation      = file.path(dir_proj,dir_BaM)
 
-dir.segment.gaug      = file.path(dir_data,dir_results) # dir. with the results of gauging segmentation
+dir.segment.gaug      = file.path(dir_proj,dir_results) # dir. with the results of gauging segmentation
 
 
 setwd(dir_data)
