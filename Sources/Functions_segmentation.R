@@ -95,16 +95,35 @@ DIC_estimation <- function(mcmc.segm,nS){
 }
 
 #===============================================================
-#' Computation of criterion DIC for optimal model selection :  
+#' Classification of gaugings for each defined period :  
 #'
-#' @param mcmc.segm MCMC simulation of each segment 
+#' @param ts.real Tau real values according to user's choice
 #' @param nS Number of segments
-#' @return Data frame with prior and posterior information to 
-#'         estimate DIC and DIC value
+#' @param X Initial Dataset, before segmentation
+#' @param XP Data of analysis period 
+#' @return Classification of gauging and identify the boundaries
+#'         limits of shift-time detected
 #===============================================================
 
-# DIC_estimation <- function(mcmc.segm,nS){
-#   
-# }
+clas_gauging <- function(ts.real,nS,X,XP){
+  if (!is.null(ts.real[1])) {
+    tss = 0
+    for (j in 1:(nS-1)) {
+      for (i in 1:(length(X)-1)) {
+        if((  X[i+1] >= ts.real[j]) & ((X[i] <= ts.real[j] ))) {
+          tss[j] = i+1
+        }
+      }
+    }
+    t.shift.plus <- XP[tss+1]
+    t.shift.before <- XP[tss]
+  } else {
+    tss <- NULL
+    t.shift.plus <- NULL
+    t.shift.before <- NULL
+  }
+  
+  return(list(tss[j],t.shift.plus,t.shift.before))
+}
 
 
