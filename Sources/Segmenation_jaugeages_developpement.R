@@ -407,7 +407,6 @@ for(id_dataset in 1:length(datasets)){
       #              then assign the shift time to the maxpost
       #           3) if the shift time is known then fix it.
       
-      # user.choice.ts=NULL
       i =0
       if (nS >1) {  
         
@@ -421,6 +420,7 @@ for(id_dataset in 1:length(datasets)){
         # Saving shift times dataframes:
         df.shift.times = data.frame(Q2.ts, Q97.ts, ts.res, ts.real)
         df.shift.times.plus = data.frame(ts.res.before, ts.res.plus, Q2.mu, Q10.mu.res, Q90.mu.res, Q97.mu,  mu.res)
+        
         # save results into txt files:
         write.table(mcmc.segment, file.path(dir.seg.iter,"mcmc_segmentation.txt"), sep ="\t", row.names=FALSE)
         write.table(tau.results.df[[seg.iter]],paste0(dir.seg.iter,"/df_tau_it", seg.iter,".txt"),sep ="\t", row.names=FALSE)
@@ -452,25 +452,31 @@ for(id_dataset in 1:length(datasets)){
       }
       
       
-      #****************************************************
-      # Classification of gaugings for each defined period
-      #****************************************************
-      if (!is.null(ts.real[1])) {
-        tss = 0
-        for (j in 1:(nS-1)) {
-          for (i in 1:(length(X)-1)) {
-            if((  X[i+1] >= ts.real[j]) & ((X[i] <= ts.real[j] ))) {
-              tss[j] = i+1
-            }
-          }
-        }
-        t.shift.plus <- XP[tss+1]
-        t.shift.before <- XP[tss]
-      } else {
-        tss <- NULL
-        t.shift.plus <- NULL
-        t.shift.before <- NULL
-      }
+      # #****************************************************
+      # # Classification of gaugings for each defined period
+      # #****************************************************
+      
+      classification_gaug <- clas_gauging(ts.real,nS,X,XP)
+      
+      tss <- classification_gaug[[1]]
+      t.shift.plus <- classification_gaug[[2]] 
+      t.shift.before <- classification_gaug[[3]]
+      # if (!is.null(ts.real[1])) {
+      #   tss = 0
+      #   for (j in 1:(nS-1)) {
+      #     for (i in 1:(length(X)-1)) {
+      #       if((  X[i+1] >= ts.real[j]) & ((X[i] <= ts.real[j] ))) {
+      #         tss[j] = i+1
+      #       }
+      #     }
+      #   }
+      #   t.shift.plus <- XP[tss+1]
+      #   t.shift.before <- XP[tss]
+      # } else {
+      #   tss <- NULL
+      #   t.shift.plus <- NULL
+      #   t.shift.before <- NULL
+      # }
       
       
       
