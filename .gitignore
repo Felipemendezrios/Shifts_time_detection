@@ -3,4 +3,5 @@
 .Ruserdata
 .Rproj
 .gitignore
-Segmentation_results
+Segmentation_results/
+BaM_segmentation/
