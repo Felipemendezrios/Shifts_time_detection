@@ -1,3 +1,0 @@
-"Results_Cooking.txt"                                      ! result.fname, name of MCMC cooking file (|!| name of the file only, not full path)
-0.5                                                        ! Burn factor (0.4 mean the first 40% of MCMC samples are burnt)
-10                                                         ! nSlim, slimming period (10 means only one MCMC sample every 10 is kept (after burning)
