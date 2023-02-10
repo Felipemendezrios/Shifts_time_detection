@@ -2,14 +2,17 @@
 # Module : Function of segmentation ------
 #-----------------------------------------
 
-#============================================
-# Initial guess to prior information of tau
-#============================================
-
-prior_ini_guess_tau	<- function(XP,nS) {
+#===============================================================
+#' Initial guess to prior information of tau :
+#'
+#' @param XP Data of analysis period 
+#' @param nS Number of segments
+#' @return Initial guess to prior information of tau 
+#===============================================================
+prior_tau_ini	<- function(XP,nS) {
   XP_half=0
     for (i in 1:length(XP)) {
-      XP_half[j] = (XP[i+1]+XP[i])/2
+      XP_half[i] = (XP[i+1]+XP[i])/2
     }
     if ((length(XP)-nS) <= 2) {
       tstart=0
@@ -33,4 +36,67 @@ prior_ini_guess_tau	<- function(XP,nS) {
     }
   return(tstart)
 }
+
+#===============================================================
+#' Computation of criterion DIC for optimal model selection :  
+#'
+#' @param mcmc.segm MCMC simulation of each segment 
+#' @param nS Number of segments
+#' @return Data frame with prior and posterior information to 
+#'         estimate DIC and DIC value
+#===============================================================
+
+DIC_estimation <- function(mcmc.segm,nS){
+  # LogPosterior simulations:
+  logpost           = as.vector(unlist(rev(mcmc.segm)[1]))
+  
+  # Number of mcmc simulations:
+  len.mcmc          = length(mcmc.segm[,1])
+  
+  # LogPriors of segments means parameters "mu"
+  priors.mu         = matrix(NA, nrow = len.mcmc, ncol = nS)
+  
+  for (i in 1:nS) {  # Case FlatPrior+
+    priors.mu[,i]  = 0
+  }
+  
+  # LogPriors of change point times "tau" (= 0 since it's a flat distribution)
+  if (nS > 1) {
+    priors.tau = matrix(0, nrow =len.mcmc, ncol = nS-1)
+  } else {
+    priors.tau = matrix(0, nrow = len.mcmc, ncol = 1)
+  }
+  
+  # Specify LogPriors for the Remnant Uncertainty:
+  # User can choose if accounting or not for uncertainty (check Options file):
+  # Case FlatPrior+
+  priors.gamma  = rep(0,len.mcmc)
+  
+  
+  # Compute LogPrior as sum of LogPriors of tau parameters (change point times) and mu parameters (segments means):
+  logprior = 0
+  
+  for (ll in 1:len.mcmc){
+    logprior[ll] = sum(priors.mu[ll,]) + sum(priors.tau[ll,])  + priors.gamma[ll]
+  }
+  # Compute LogLikelihood as difference between LogPosterior and LogPrior (Bayes' theorem):
+  loglikelihood = logpost - logprior
+  df.mcmc.LL = data.frame(loglikelihood = loglikelihood, logprio = logprior, logposterior  = logpost)
+  
+  # Compute the Maximum LogLikelihood and the maximum LogPosterior, and their variances:
+  maxpost[nS]          = max(logpost)
+  maxLikelihood[nS]    = max(loglikelihood)
+  Likelihood.maxpost   = loglikelihood[which.max(logpost)]
+  varLogpost[nS]       = var(logpost)
+  varLogLikelihood[nS] = var(loglikelihood)
+  #MeanDev             =-2*mean(logpost)
+  MeanDev              = -2*mean(loglikelihood)
+  
+  DIC =  MeanDev + 2*varLogLikelihood[nS]   #ref: Gelman 2004 "Bayesian data analysis"
+  
+  DIC_estimation <- list(df.mcmc.LL,DIC)
+  return(DIC_estimation)
+}
+
+
 
