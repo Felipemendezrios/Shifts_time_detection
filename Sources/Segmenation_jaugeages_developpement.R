@@ -13,10 +13,12 @@ if(length(new_packages)) install.packages(new_packages)
 library(RBaM)
 library(ggplot2)
 
+# Directories : 
 dir_proj <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection')
 dir_data <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection/Datasets')
 dir_BaM <- c('BaM_segmentation')
 dir_results <- c('Segmentation_results')
+dir_sources <- c('Sources')
 
 # create directories 
 
@@ -27,6 +29,11 @@ dir.create(file.path(dir_proj, dir_results),showWarnings = FALSE)
 dir.segmentation      = file.path(dir_proj,dir_BaM)
 
 dir.segment.gaug      = file.path(dir_proj,dir_results) # dir. with the results of gauging segmentation
+
+setwd(dir = dir_sources)
+
+# Functions:
+source("Functions_segmentation.R")
 
 
 setwd(dir_data)
@@ -70,7 +77,8 @@ remnant_temp <- list(remnantErrorModel(funk = "Constant",
 # start iterations:
 ###################
 
-for(id_dataset in 1:length(datasets)){
+# for(id_dataset in 1:length(datasets)){
+for(id_dataset in 2:2){
   # Monitor computing time 
   T1<-Sys.time()
   
@@ -177,32 +185,9 @@ for(id_dataset in 1:length(datasets)){
         
         residual_seg <- vector(mode = 'list',length = npar)
         
-        # if(nS>1){
-        #   XP_half=0
-        #   for (j in 1:length(XP)) {
-        #     XP_half[j] = (XP[j+1]+XP[j])/2
-        #   }
-        #   if ((length(XP)-nS) <= 2) {
-        #     tstart=0
-        #     for (j in 1: (nS-1)) {
-        #       tstart[j] = XP_half[j]
-        #     }
-        #   } else {
-        #     step = trunc((length(XP)-1)/(nS-1), digits = 0)
-        #     init = trunc((length(XP)-1)/2)
-        #     tstart=0
-        #     aaa = 0
-        #     for (j in 1: (nS-1)) {
-        #       if (j %% 2 == 0){
-        #         tstart[j] = XP_half[init + step*aaa]
-        #       } else {
-        #         tstart[j] = XP_half[init - step*aaa]
-        #         aaa=aaa+1
-        #       }
-        #     }
-        #     tstart =sort(tstart)
-        #   }
-        # }
+        if(nS>1){
+          tstart <- prior_ini_guess_tau(XP=XP,nS=nS)
+        }
         
         for(j in 1:npar){
           if (j<=nS){
