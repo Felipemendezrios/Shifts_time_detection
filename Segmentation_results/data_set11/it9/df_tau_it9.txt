@@ -1,0 +1,2 @@
+"tau.MAP"	"tau.q2"	"tau.q10"	"tau.q90"	"tau.q97"	"tau.stdev"	"tau.mean"	"tau.median"	"tau.before"	"tau.shift"	"tau.plus"	"iteration"
+9.03627	8.9643465	8.96984	9.03224	9.0417555	0.0229925	9.00135	9.00211	5.91278506908566	9.03627	9.96303860098124	9

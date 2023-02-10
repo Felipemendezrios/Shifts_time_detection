@@ -1,0 +1,2 @@
+"mu.MAP"	"mu.q2"	"mu.q10"	"mu.q90"	"mu.q97"	"mu.stdev"	"mu.mean"	"mu.median"	"mu.iteration"
+99.8018	99.3549925	99.5194	100.069	100.207975	0.217578	99.8058	99.8175	2

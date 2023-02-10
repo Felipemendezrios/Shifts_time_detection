@@ -1,0 +1,1 @@
+"Results_Summary.txt"                                      ! result.fname, name of MCMC summary file (|!| name of the file only, not full path)
