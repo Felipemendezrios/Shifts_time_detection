@@ -3,16 +3,18 @@ rm(list=ls())# Clean workspace
 
 set.seed(2023)  #Set seed for reproducibility
 
+#===============================================================
 #Install packages
-
 list_packages <- c("RBaM", "ggplot2")
 new_packages <- list_packages[!(list_packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 
+#===============================================================
 # Libraries:
 library(RBaM)
 library(ggplot2)
 
+#===============================================================
 # Directories : 
 dir_proj <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection')
 dir_data <- c('C:/Users/famendezrios/Documents/Felipe_MENDEZ/GitHub/Shifts_time_detection/Datasets')
@@ -20,8 +22,8 @@ dir_BaM <- c('BaM_segmentation')
 dir_results <- c('Segmentation_results')
 dir_sources <- c('Sources')
 
+#===============================================================
 # create directories 
-
 dir.create(file.path(dir_proj, dir_BaM),showWarnings = FALSE)
 dir.create(file.path(dir_proj, dir_results),showWarnings = FALSE)
 
@@ -32,6 +34,7 @@ dir.sources      = file.path(dir_proj,dir_sources)
   
 setwd(dir = dir.sources)
 
+#===============================================================
 # Functions:
 source("Functions_segmentation.R")
 
@@ -46,13 +49,13 @@ nX=1
 nY=1
 
 nSmax = 2  # Maximum number of segments in the series at each iteration 
-# nS <- 2
 nCycles <- 100
 burn <- 0.5
 nSlim <- 10
 run_option_calibration <- T
 remnant_unc <- c(0,100) # prior remnant uncertainty c(min,max)
 
+#===============================================================
 # Config_Xtra
 tmin_xtra= 0
 nmin_xtra= 1
@@ -72,25 +75,24 @@ remnant_temp <- list(remnantErrorModel(funk = "Constant",
                                                             init=1 ,
                                                             prior.dist = "FlatPrior+"))))
 
-###################
+#===============================================================
 # start iterations:
-###################
+#===============================================================
 
 for(id_dataset in 1:length(datasets)){
 
   # Monitor computing time 
   T1<-Sys.time()
   
-  # for(id_dataset in 2:2){
   end.end <- FALSE
   
   # plots:
   seg.plot = NULL
   plot_p <- NULL
   
-  ################
-  #Initialisation:
-  ################
+  #===============================================================
+  #Initialization:
+  
   # iteration indexes: "depth search tree approach"
   i_init = i_final = level = 0;  
   i = seg.period =  seg.iter = i_init[1] = 1; 
@@ -98,10 +100,10 @@ for(id_dataset in 1:length(datasets)){
   end.end = FALSE;
   tss_tot_ns = c(1); 
   final.period=NULL
-  # i_final[1] = length(Q_Gaug); tss_tot_ns = c(1); 
-  # final.period = acf_resid = Pacf_resid = autocorr_lag_resid = NULL; 
+  
   ## segments means:
   mean.of.segments = mu.results.df = NULL;
+  
   ##shift times:
   times.of.shift.MAP = t.q10 = t.q90 = t.q2 = t.q97 = ts.all.real = ts.all.real.2 = NULL; 
   ts.all.MAP = ts.all.q2 = ts.all.q10 = ts.all.q90 =  ts.all.q97 = ts.morpho.real = NULL; 
@@ -148,22 +150,23 @@ for(id_dataset in 1:length(datasets)){
                         "Period" = 1)
     nobs.P    = length(XP)
     
-    #**************************************************************************************************************     
+    #===============================================================
     # Segmentation of residuals (iterative segmentation with increasing number of segments):
-    #**************************************************************************************************************
+    #===============================================================
     
-    # initialisation:   DIC = Deviance Information Criterion
+    # initialization:   DIC = Deviance Information Criterion
     
     # criteria for model selection:
     DIC=0;
     npar =0; 
    
-     #Number of observations:
+    #Number of observations:
     N = length(YP) 
     
+    #===============================================================
     # Perform the segmentation only if there are at least 3 data,
     # otherwise skip: 
-    ##########
+    #===============================================================
     if (N>2) {
       
       i = 1 # i = number of segments
@@ -175,9 +178,9 @@ for(id_dataset in 1:length(datasets)){
         
         dir.create(paste0(dir.seg.iter,"/nS",nS),showWarnings = FALSE)
         dir.nS    <- paste0(dir.seg.iter,"/nS",nS)
-        #=======================#
-        #segmentation
-        #=======================#
+        #===============================================================
+        # Segmentation  
+        #===============================================================
         npar = nS + nS - 1
         N = length(XP)
         
@@ -207,14 +210,12 @@ for(id_dataset in 1:length(datasets)){
         }
         
         # dataset object
-        
         data=dataset(X=data.frame(XP),
                      Y=data.frame(YP),
                      Yu=data.frame(YuP),
                      data.dir=dir.segmentation)
         
         # Config_Xtra 
-        
         xtra=xtraModelInfo(fname="Config_Xtra.txt",
                            object=c(nS,
                                     tmin_xtra,
@@ -222,6 +223,7 @@ for(id_dataset in 1:length(datasets)){
                                     option_xtra)
                            )
         
+        # Model
         mod=model(fname='Config_Model.txt',
                   ID='Segmentation',
                   nX=nX,
@@ -256,13 +258,14 @@ for(id_dataset in 1:length(datasets)){
         resid.segm   <- read.table(file=paste0(dir.segmentation,"/Results_Residuals.txt"),header=TRUE)
         summary.segm <- read.table(file=paste0(dir.segmentation,"/Results_Summary.txt"),header=TRUE)
 
-        #=======================#
+        #===============================================================
         #end of segmentation
-        #=======================#
-        #*****************************************************
+        #===============================================================
+        
+        #===============================================================
         # COMPUTATION OF CRITERIA FOR OPTIMAL MODEL SELECTION:
-        #*****************************************************
-
+        #===============================================================
+        
         DIC_calcul <- DIC_estimation(mcmc.segm,nS)
         df.mcmc.LL <- DIC_calcul[[1]]
         DIC [i] <- DIC_calcul[[2]]
@@ -276,11 +279,11 @@ for(id_dataset in 1:length(datasets)){
       colnames(DIC_export) <- c("ns1","nS2") 
       write.table(DIC_export,file=file.path(dir.seg.iter,'DIC.txt'),sep="\t",col.names = TRUE, row.names = F)
      
-      #*******************************************************************************************************
+      #===============================================================
       # Analysis of segmentation results for this period:
-      #*******************************************************************************************************
-      # min values:
+      #===============================================================
       
+      # min values:
       DICmin = which.min(DIC);
       
       # Optimal number of segments according to criterion:
@@ -296,12 +299,12 @@ for(id_dataset in 1:length(datasets)){
       Results.seg     <- read.table(file=file.path(dir.nS.ok,"Results_Summary.txt"),sep="",header=TRUE)
       mcmc.segment    <- read.table(file=file.path(dir.nS.ok,"Results_Cooking.txt"),sep="",header=TRUE)
       
-      #initialisation of results:
+      #initialization of results:
       Q2.ts = NULL; Q97.ts = NULL; Q2.mu = NULL; Q97.mu = NULL;
       
       if ( nS > 1) { # if at least one change point:
+        #===============================================================
         # change point times "tau":
-        #*************************
         ts.res       <- as.numeric(c(Results.seg[16,(nS+1):(2*nS-1)]))  #the maxpost of all mcmc
         ts.mean      <- as.numeric(c(Results.seg[5,(nS+1):(2*nS-1)]))  #the maxpost of all mcmc
         ts.median    <- as.numeric(c(Results.seg[6,(nS+1):(2*nS-1)]))  #the maxpost of all mcmc
@@ -315,8 +318,8 @@ for(id_dataset in 1:length(datasets)){
         Q10.ts       <- as.numeric(c(Results.seg[7,(nS+1):(2*nS-1)]))
         Q90.ts       <- as.numeric(c(Results.seg[10,(nS+1):(2*nS-1)]))
         
+        #===============================================================
         # segments mean "mu":
-        #********************
         mu.res       <- as.numeric(Results.seg[16,1:nS])
         mu.mean      <- as.numeric(c(Results.seg[5,1:nS]))  #the maxpost of all mcmc
         mu.median    <- as.numeric(c(Results.seg[6,1:nS]))  #the maxpost of all mcmc
@@ -328,16 +331,17 @@ for(id_dataset in 1:length(datasets)){
         Q90.mu.res   <- as.numeric(Results.seg[10,1:(nS)])
         stdev.mu     <- as.numeric(Results.seg[11,1:(nS)])
         seg.iter.shift <- seg.iter
+        
+        #===============================================================
         #structural error parameter "gamma":
-        #**********************************
         gamma.MAP    <- as.numeric(Results.seg[16,2*nS])
         gamma.stdev  <- as.numeric(Results.seg[11,2*nS])
         gamma.mean   <- as.numeric(Results.seg[5,2*nS])
         final.period = c(final.period,1)
         
-        ######################################################   
+        #===============================================================  
       } else { # if no change points ==> only one segment !!
-        ######################################################
+        #===============================================================
         ts.res = ts.res.before = ts.res.plus = ts.mean = ts.median = NULL;
         stdev.ts = NULL; seg.iter.shift = NULL
         Q2.ts = Q97.ts = Q10.ts = Q90.ts = NULL;
@@ -396,9 +400,9 @@ for(id_dataset in 1:length(datasets)){
       times.of.shift.MAP <- times.of.shift.MAP[c(TRUE, !times.of.shift.MAP[-length(times.of.shift.MAP)] == times.of.shift.MAP[-1])]
       mean.of.segments   <-  mean.of.segments[c(TRUE, !mean.of.segments[-length( mean.of.segments)] ==  mean.of.segments[-1])]
       
-      #*********************************************************************
+      #===============================================================
       # Shift times adjustment ==> Identification of the "true" shift times:
-      #*********************************************************************
+      #===============================================================
       ts.real  = NULL; 
       # Looking inside the u95% interval of the shift times.
       #
@@ -452,44 +456,33 @@ for(id_dataset in 1:length(datasets)){
       }
       
       
-      # #****************************************************
-      # # Classification of gaugings for each defined period
-      # #****************************************************
+      #===============================================================
+      # Classification of gaugings for each defined period
+      #===============================================================
       
       classification_gaug <- clas_gauging(ts.real,nS,X,XP)
       
       tss <- classification_gaug[[1]]
       t.shift.plus <- classification_gaug[[2]] 
       t.shift.before <- classification_gaug[[3]]
-     
-      #***********************************************
-      #definition of the "stable" periods of data:
-      #***********************************************
-      tss_tot    =  c(tss_tot_ns, tss)
-      tss_tot    =  tss_tot[c(TRUE, !tss_tot[-length(tss_tot)] == tss_tot[-1])]
-      tss_tot    =  sort(tss_tot)
-      tss_tot_ns =  tss_tot
-      i_init     =  0; 
-      i_final    =  0;
-      for (i in 1:(length(tss_tot)-1)) {
-        i_init[i]  = tss_tot[i]
-        i_final[i] = tss_tot[i+1]-1
-      }   
-      if (tss_tot[length(tss_tot)] == length(X)) {
-        i_init[length(tss_tot)]  = tss_tot[length(tss_tot)]
-        i_final[length(tss_tot)] = tss_tot[length(tss_tot)]
-      } else {
-        i_init[length(tss_tot)]  = tss_tot[length(tss_tot)]
-        i_final[length(tss_tot)] = length(X)
-      }
-      #***********************
-      # end of segmentation:
-      #**********************
+
+      #===============================================================
+      # Definition of the "stable" periods of data:
+      #===============================================================
+      stable_period_P <- stable_period(tss_tot_ns,tss,X)
+
+      i_init  <- stable_period_P[[1]]
+      i_final <- stable_period_P[[2]]
+      tss_tot_ns <- stable_period_P[[3]]
       
-      #**********************************************************************
+      #===============================================================
+      # end of segmentation:
+      #===============================================================
+      
+      #===============================================================
       # Plot residuals time series with segmentation results :
-      #**********************************************************************
-      if (!is.null(ts.res[1])) {
+      #===============================================================
+            if (!is.null(ts.res[1])) {
         seg.plot[[seg.iter]] <- ggplot()+
           geom_point(data=data_P, aes(x=X,y=Y))+
           geom_errorbar(data=data_P,
@@ -718,9 +711,8 @@ for(id_dataset in 1:length(datasets)){
     
     write.table(data_result, paste0(dir_data_set,"/tau_mu_result.txt"), sep ="\t", row.names=FALSE)
     
-    
-    ### Plots
-    
+    #===============================================================
+    # Plots
     
     plot_p <- ggplot(dataset_P, aes(x=t,y=obs))+
       geom_point()+
@@ -776,7 +768,8 @@ for(id_dataset in 1:length(datasets)){
       
       write.table(stable_mu_period, paste0(dir_data_set,"/mu_result.txt"), sep ="\t", row.names=FALSE)
       
-      ### Plots
+      #===============================================================
+      # Plots
       
       plot_p <- ggplot(dataset_P, aes(x=t,y=obs))+
         geom_point()+
