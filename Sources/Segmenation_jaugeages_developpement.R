@@ -461,26 +461,7 @@ for(id_dataset in 1:length(datasets)){
       tss <- classification_gaug[[1]]
       t.shift.plus <- classification_gaug[[2]] 
       t.shift.before <- classification_gaug[[3]]
-      # if (!is.null(ts.real[1])) {
-      #   tss = 0
-      #   for (j in 1:(nS-1)) {
-      #     for (i in 1:(length(X)-1)) {
-      #       if((  X[i+1] >= ts.real[j]) & ((X[i] <= ts.real[j] ))) {
-      #         tss[j] = i+1
-      #       }
-      #     }
-      #   }
-      #   t.shift.plus <- XP[tss+1]
-      #   t.shift.before <- XP[tss]
-      # } else {
-      #   tss <- NULL
-      #   t.shift.plus <- NULL
-      #   t.shift.before <- NULL
-      # }
-      
-      
-      
-      
+     
       #***********************************************
       #definition of the "stable" periods of data:
       #***********************************************
