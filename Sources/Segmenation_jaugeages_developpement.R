@@ -533,27 +533,40 @@ for(id_dataset in 1:length(datasets)){
       
         ggsave(file=paste0(dir.seg.iter,"/segmentation_it",seg.iter,".png"))
     
+        #===============================================================
         # update iteration and period index:
-        if ((nS ==1) & (i_final[seg.period] != (length(Y)))){
-          seg.period = seg.period +1
-          seg.iter = seg.iter + 1
-          # segmentation is finished for this current period!!! only one segment has been found in this period!
-          # we pass to another period
-        } else if ((nS != 1)) {
-          seg.period = seg.period
-          seg.iter = seg.iter + 1
-          
-        } else if ((nS ==1) & (i_final[seg.period] == (length(Y)))) { #all periods have been completely segmentated ) {
-          end.end = TRUE
-          #final.period = 1
-          #segmentation is finished. stop !!!!!
+        #===============================================================
+        
+        update_seg_p <- update_seg(nS,i_final,seg.period,seg.iter,Y)
+        
+        seg.period <- update_seg_p[[1]] 
+        seg.iter   <- update_seg_p[[2]]
+        end.end    <- update_seg_p[[3]]
+        
+        if( end.end = TRUE){
           print("segmentation finished!")
-          
-        } else {
-          seg.period = seg.period +1
-          seg.iter   = seg.iter + 1         
-          
         }
+        # if ((nS ==1) & (i_final[seg.period] != (length(Y)))){
+        #   seg.period = seg.period +1
+        #   seg.iter = seg.iter + 1
+        #   # segmentation is finished for this current period!!! only one segment has been found in this period!
+        #   # we pass to another period
+        # } else if ((nS != 1)) {
+        #   seg.period = seg.period
+        #   seg.iter = seg.iter + 1
+        #   
+        # } else if ((nS ==1) & (i_final[seg.period] == (length(Y)))) { #all periods have been completely segmentated ) {
+        #   end.end = TRUE
+        #   #final.period = 1
+        #   #segmentation is finished. stop !!!!!
+        #   print("segmentation finished!")
+        #   
+        # } else {
+        #   seg.period = seg.period +1
+        #   seg.iter   = seg.iter + 1         
+        #   
+        # }
+        
         # Monitor computing time 
         T4<-Sys.time()
         Tdiff=difftime(T4,T3)
