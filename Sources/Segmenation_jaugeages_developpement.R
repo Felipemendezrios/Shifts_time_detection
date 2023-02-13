@@ -536,37 +536,16 @@ for(id_dataset in 1:length(datasets)){
         #===============================================================
         # update iteration and period index:
         #===============================================================
-        
         update_seg_p <- update_seg(nS,i_final,seg.period,seg.iter,Y)
         
         seg.period <- update_seg_p[[1]] 
         seg.iter   <- update_seg_p[[2]]
         end.end    <- update_seg_p[[3]]
         
-        if( end.end = TRUE){
+        if( end.end == TRUE){
           print("segmentation finished!")
         }
-        # if ((nS ==1) & (i_final[seg.period] != (length(Y)))){
-        #   seg.period = seg.period +1
-        #   seg.iter = seg.iter + 1
-        #   # segmentation is finished for this current period!!! only one segment has been found in this period!
-        #   # we pass to another period
-        # } else if ((nS != 1)) {
-        #   seg.period = seg.period
-        #   seg.iter = seg.iter + 1
-        #   
-        # } else if ((nS ==1) & (i_final[seg.period] == (length(Y)))) { #all periods have been completely segmentated ) {
-        #   end.end = TRUE
-        #   #final.period = 1
-        #   #segmentation is finished. stop !!!!!
-        #   print("segmentation finished!")
-        #   
-        # } else {
-        #   seg.period = seg.period +1
-        #   seg.iter   = seg.iter + 1         
-        #   
-        # }
-        
+
         # Monitor computing time 
         T4<-Sys.time()
         Tdiff=difftime(T4,T3)
@@ -676,7 +655,7 @@ for(id_dataset in 1:length(datasets)){
                                         iter  = shift.results.df$iteration)
     
     write.table(shift.times.gaugings2, paste0(dir_data_set,"/shift_times.txt"), sep ="\t", row.names=FALSE)
-    # tau.results.df
+    
     stable_mu_period = NULL
 
     for(i in 1:length(which(final.period==0))){
@@ -692,32 +671,12 @@ for(id_dataset in 1:length(datasets)){
     
     # final.period <- c(1,1,0,1,1,0,1,0,0,0,0)
     # final.period <- c(1,1,1,0,0,1,1,0,0,0,1,0,0)
-    final.period_test <- final.period
-    id_iter_above=NULL
-    for(i in 1:length(which(final.period==0))){
-      id_stable_mu_period <- which(final.period==0)[i]
-      j <- 1
-      end.end.2 <- FALSE
-      while(end.end.2==FALSE){
-        if(final.period_test[id_stable_mu_period-j]==1){
-          id_iter_above <- rbind(id_iter_above,data.frame(iter_above=id_stable_mu_period-j,
-                                                          iter=id_stable_mu_period))
-          if(length(which(final.period_test==1))>1){
-            final.period_test[id_stable_mu_period-j] <- 0
-          }
-          end.end.2 = TRUE
-        }else{
-          j <- j+1
-        }
-        
-      }
-      # if (j >= 2){
-      #   final.period_test[id_stable_mu_period-j] <- 0
-      # }else if(final.period_test[id_stable_mu_period+1]==1){
-      #   final.period_test[id_stable_mu_period-1] <- 0
-      #   
-      # }
-    }
+    
+    #===============================================================
+    # Assign segments to a iteration following tree structure
+    #===============================================================
+    id_iter_above <-  match_seg_iter(final.period)
+    
     
     stable_mu_period_t <- merge(stable_mu_period,id_iter_above,by='iter')
     data_result <- merge(stable_mu_period_t,shift.times.gaugings2, by.x = 'iter_above', by.y = 'iter', sort=F)
