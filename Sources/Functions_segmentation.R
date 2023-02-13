@@ -159,4 +159,42 @@ stable_period <- function(tss_tot_ns,tss,X){
   return(stable_period_ini_final)
 }
 
+#===============================================================
+#' Update iteration and period index:  
+#'
+#' @param nS Number of segments
+#' @param i_final Index of the final of stable period 
+#' @param seg.period Index of period
+#' @param seg.iter Index of iteration
+#' @param Y Initial observation of Dataset, before segmentation
+#' @return Vectors with initial and final data respectively
+#===============================================================
+
+update_seg <- function(nS,i_final,seg.period,seg.iter,Y){
+  # update iteration and period index:
+  if ((nS ==1) & (i_final[seg.period] != (length(Y)))){
+    seg.period = seg.period +1
+    seg.iter = seg.iter + 1
+    end.end = FALSE
+    # segmentation is finished for this current period!!! only one segment has been found in this period!
+    # we pass to another period
+    
+    } else if ((nS != 1)) {
+    seg.period = seg.period
+    seg.iter = seg.iter + 1
+    end.end = FALSE
+    
+    } else if ((nS ==1) & (i_final[seg.period] == (length(Y)))) { #all periods have been completely segmentated ) {
+    end.end = TRUE
+    } else {
+    seg.period = seg.period +1
+    seg.iter   = seg.iter + 1    
+    end.end = FALSE
+  }
+  
+  update_seg_p <- list(seg.period,seg.iter,end.end)
+  return(update_seg_p)
+}
+
+
 
