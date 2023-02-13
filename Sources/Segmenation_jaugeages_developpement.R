@@ -41,10 +41,8 @@ source("Functions_segmentation.R")
 setwd(dir_data)
 
 load(file='datasets.RData')
-# dataset_ben <- datasets[[3]]
 
 # Input data
-
 nX=1
 nY=1
 
@@ -56,7 +54,7 @@ run_option_calibration <- T
 remnant_unc <- c(0,100) # prior remnant uncertainty c(min,max)
 
 #===============================================================
-# Config_Xtra
+# Config_Xtra : extra information needed to launch BaM
 tmin_xtra= 0
 nmin_xtra= 1
 option_xtra= 1
@@ -101,10 +99,10 @@ for(id_dataset in 1:length(datasets)){
   tss_tot_ns = c(1); 
   final.period=NULL
   
-  ## segments means:
+  # segments means:
   mean.of.segments = mu.results.df = NULL;
   
-  ##shift times:
+  # shift times:
   times.of.shift.MAP = t.q10 = t.q90 = t.q2 = t.q97 = ts.all.real = ts.all.real.2 = NULL; 
   ts.all.MAP = ts.all.q2 = ts.all.q10 = ts.all.q90 =  ts.all.q97 = ts.morpho.real = NULL; 
   ts.morpho.MAP = ts.morpho.q2 = ts.morpho.q97 = tau.results.df = NULL; 
@@ -115,7 +113,7 @@ for(id_dataset in 1:length(datasets)){
                                  t10   = double(), 
                                  t90   = double(),
                                  t97   = double())
-  #dataset
+  # dataset
   dataset_P <- datasets[[id_dataset]]
   X <- dataset_P$t
   Y <- dataset_P$obs
