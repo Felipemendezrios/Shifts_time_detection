@@ -129,12 +129,10 @@ clas_gauging <- function(ts.real,nS,X,XP){
 #===============================================================
 #' Definition of the "stable" periods of data:  
 #'
-#' @param ts.real Tau real values according to user's choice
-#' @param nS Number of segments
+#' @param tss_tot_ns Classification of all gauging through segmentations
+#' @param tss Classification of gauging 
 #' @param X Initial Dataset, before segmentation
-#' @param XP Data of analysis period 
-#' @return Classification of gauging and identify the boundaries
-#'         limits of shift-time detected
+#' @return Vectors with initial and final data respectively
 #===============================================================
 
 stable_period <- function(tss_tot_ns,tss,X){
@@ -156,7 +154,7 @@ stable_period <- function(tss_tot_ns,tss,X){
     i_final[length(tss_tot)] = length(X)
   }
   
-  stable_period_ini_final <- list(i_init,i_final)
+  stable_period_ini_final <- list(i_init,i_final,tss_tot_ns)
   
   return(stable_period_ini_final)
 }
