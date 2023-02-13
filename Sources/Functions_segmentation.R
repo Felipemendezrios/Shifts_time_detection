@@ -196,5 +196,51 @@ update_seg <- function(nS,i_final,seg.period,seg.iter,Y){
   return(update_seg_p)
 }
 
+#===============================================================
+#' Assign the index of the segmentation iteration and where 
+#' it is located in the tree structure :  
+#' ex: tree structure - c(it1=1,it2=1,it3=0,it4=0,it5=1,it6=0,it7=0)
+#' c(it1=1) so, segmentation detected -> 2 segments but it analyze just one until not segmentation 
+#' c(it2=1) so, segmentation detected -> analyse first part of tree structure
+#' c(it3=0) so, any segmentation detected. STOP and analyze the other segment
+#' c(it4=0) so, any segmentation detected. STOP and go back in the tree structure
+#' c(it5=1) so, segmentation detected -> this is the another part of first segmentation. Analyse first part again
+#' c(it6=0) so, any segmentation detected. STOP and analyze the other segment
+#' c(it7=0) so, any segmentation detected. STOP. Not more segmentation
+#' Finally, the goal is to associate the segments to a iteration.
+#' So, in this example, the recursive processes will proceed as follows:
+#' "*" means the connextion in the tree structure
+#' firs at all, we detect all zeros (stable periods),then we go through them 
+#' (iit1=1,*it2=1*,*it3=0*,it4=0,it5=1,it6=0,it7=0) -> (1,*0*,*0*,0,1,0,0) -> iter = 3 link to iter_abov = 2 and it becomes *0*
+#' (*1*,0,0,*0*,1,0,0) -> (*0*,0,0,*0*,1,0,0) -> iter = 4 link to iter_abov = 1
+#' (0,0,0,0,*1*,*0*,0) -> (0,0,0,0,*1*,*0*,0) -> iter = 6 link to iter_abov = 5 
+#' With not more number 1 is detected -> processus finished! - link to the same iteration
+#' (0,0,0,0,*1*,0,*0*) -> (0,0,0,0,*0*,0,*0*) -> iter = 7 link to iter_abov = 5
+#'  
+#' @param final.period Tree structure with specific writing (automatically)
+#' @return Index to associate a segment with an iteration 
+#===============================================================
 
+match_seg_iter <- function(final.period){
+  final.period_test <- final.period
+  id_iter_above=NULL
+  for(i in 1:length(which(final.period==0))){
+    id_stable_mu_period <- which(final.period==0)[i]
+    j <- 1
+    end.end.2 <- FALSE
+    while(end.end.2==FALSE){
+      if(final.period_test[id_stable_mu_period-j]==1){
+        id_iter_above <- rbind(id_iter_above,data.frame(iter_above=id_stable_mu_period-j,
+                                                        iter=id_stable_mu_period))
+        if(length(which(final.period_test==1))>1){
+          final.period_test[id_stable_mu_period-j] <- 0
+        }
+        end.end.2 = TRUE
+      }else{
+        j <- j+1
+      }
+    }
+  }
+  return(id_iter_above)
+}
 
