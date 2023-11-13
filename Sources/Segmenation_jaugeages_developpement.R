@@ -1,5 +1,6 @@
 cat("\014") # Clear console
 rm(list=ls())# Clean workspace
+dev.off()
 
 set.seed(2023)  #Set seed for reproducibility
 
@@ -13,6 +14,8 @@ if(length(new_packages)) install.packages(new_packages)
 # Libraries:
 library(RBaM)
 library(ggplot2)
+library(dplyr)
+library(cowplot)
 
 #===============================================================
 # Directories : 
@@ -52,6 +55,7 @@ burn <- 0.5
 nSlim <- 10
 run_option_calibration <- T
 remnant_unc <- c(0,100) # prior remnant uncertainty c(min,max)
+plot_p_total <- list()
 
 #===============================================================
 # Config_Xtra : extra information needed to launch BaM
@@ -145,7 +149,7 @@ for(id_dataset in 1:length(datasets)){
     data_P = data.frame("X"      = XP,
                         "Y"      = YP,
                         "Yu"     = YuP,
-                        "Period" = 1)
+                        "Period" = seg.period)
     nobs.P    = length(XP)
     
     #===============================================================
@@ -482,11 +486,12 @@ for(id_dataset in 1:length(datasets)){
       #===============================================================
             if (!is.null(ts.res[1])) {
         seg.plot[[seg.iter]] <- ggplot()+
-          geom_point(data=data_P, aes(x=X,y=Y))+
+          geom_point(data=data_P, aes(x=X,y=Y,col=factor(Period)))+
           geom_errorbar(data=data_P,
                         aes(x =X,
                             ymin=Y-Yu,
-                            ymax=Y+Yu),width=0.2)+
+                            ymax=Y+Yu,
+                            col=factor(Period)),width=0.2)+
           geom_rect( mapping= aes(xmin = Q2.ts,
                                   xmax = Q97.ts,
                                   ymin = -Inf, 
@@ -505,15 +510,17 @@ for(id_dataset in 1:length(datasets)){
                                    yend = mu.res),
                        col  = '#CB2027')+
           coord_cartesian(clip = 'off')+
-          labs(x = 'Time [ ]', y='Measurement [ ]')+
+          guides(color = guide_legend(title='Period'))+    
+          labs(x = 't', y='obs')+
           theme_bw()
       }else{
         seg.plot[[seg.iter]] <- ggplot()+
-          geom_point(data=data_P, aes(x=X,y=Y))+
+          geom_point(data=data_P, aes(x=X,y=Y,col=factor(Period)))+
           geom_errorbar(data=data_P,
                         aes(x =X,
                             ymin=Y-Yu,
-                            ymax=Y+Yu),width=0.2)+
+                            ymax=Y+Yu,
+                            col=factor(Period)),width=0.2)+
           geom_rect(mapping = aes(xmin = data_P$X[1], 
                                   xmax = rev(data_P$X)[1], 
                                   ymin = Q2.mu ,
@@ -525,7 +532,8 @@ for(id_dataset in 1:length(datasets)){
                                    yend = mu.res),
                        col  = '#CB2027')+
           coord_cartesian(clip = 'off')+
-          labs(x = 'Time [ ]', y='Measurement [ ]')+
+          guides(color = guide_legend(title='Period'))+    
+          labs(x = 't', y='obs')+
           theme_bw()
         }
       
@@ -564,11 +572,12 @@ for(id_dataset in 1:length(datasets)){
         write.table(mu.results.df[[seg.iter]], paste0(dir.seg.iter,"/df_mu_it", seg.iter,".txt"), sep ="\t", row.names=FALSE)
         
         seg.plot[[seg.iter]] <- ggplot()+
-          geom_point(data=data_P, aes(x=X,y=Y))+
+          geom_point(data=data_P, aes(x=X,y=Y,col=factor(Period)))+
           geom_errorbar(data=data_P,
                         aes(x =X,
                             ymin=Y-Yu,
-                            ymax=Y+Yu),width=0.2)+
+                            ymax=Y+Yu,
+                            col=factor(Period)),width=0.2)+
           geom_rect(mapping = aes(xmin = 0.9*data_P$X[1], 
                                   xmax = 1.1*rev(data_P$X)[1], 
                                   ymin = mu.results.df[[seg.iter]]$mu.q2 ,
@@ -580,7 +589,8 @@ for(id_dataset in 1:length(datasets)){
                                    yend = mu.results.df[[seg.iter]]$mu.MAP),
                        col  = '#CB2027')+
           coord_cartesian(clip = 'off')+
-          labs(x = 'Time [ ]', y='Measurement[ ]')+
+          guides(color = guide_legend(title='Period'))+    
+          labs(x = 't', y='obs')+
           theme_bw()
       
       ggsave(file=paste0(dir.seg.iter,"/segmentation_it",seg.iter,".png"))
@@ -600,11 +610,12 @@ for(id_dataset in 1:length(datasets)){
         write.table(mu.results.df[[seg.iter]], paste0(dir.seg.iter,"/df_mu_it", seg.iter,".txt"), sep ="\t", row.names=FALSE)
         
         seg.plot[[seg.iter]] <- ggplot()+
-          geom_point(data=data_P, aes(x=X,y=Y))+
+          geom_point(data=data_P, aes(x=X,y=Y,col=factor(Period)))+
           geom_errorbar(data=data_P,
                         aes(x =X,
                             ymin=Y-Yu,
-                            ymax=Y+Yu),width=0.2)+
+                            ymax=Y+Yu,
+                            col=factor(Period)),width=0.2)+
           geom_rect(mapping = aes(xmin = 0.9*data_P$X[1], 
                                   xmax = 1.1*rev(data_P$X)[1], 
                                   ymin = mu.results.df[[seg.iter]]$mu.q2 ,
@@ -615,8 +626,9 @@ for(id_dataset in 1:length(datasets)){
                                    y    = mu.results.df[[seg.iter]]$mu.MAP, 
                                    yend = mu.results.df[[seg.iter]]$mu.MAP),
                        col  = '#CB2027')+
+          guides(color = guide_legend(title='Period'))+
           coord_cartesian(clip = 'off')+
-          labs(x = 'Time [ ]', y='Measurement[ ]')+
+          labs(x = 't', y='obs')+
           theme_bw()
         
         ggsave(file=paste0(dir.seg.iter,"/segmentation_it",seg.iter,".png"))
@@ -684,11 +696,42 @@ for(id_dataset in 1:length(datasets)){
     #===============================================================
     # Plots
     
-    plot_p <- ggplot(dataset_P, aes(x=t,y=obs))+
-      geom_point()+
-      geom_errorbar(aes(ymin=obs-u,ymax=obs+u),width=0.2)+
+    if(length(shift.times.gaugings2$treal)!=0){
+      nb_change <- length(shift.times.gaugings2$treal)
+      if(nb_change==1){
+        dataset_P_segmented <- cbind(dataset_P,
+                                     Period = ifelse((dataset_P$t-shift.times.gaugings2$treal)<0,1,2))
+        
+      }else{
+        nb_change_temp <- nb_change+1
+        Period <- vector(mode='numeric',length = length(dataset_P$t))
+        for(z in 1:nb_change_temp){
+          if(z==1){
+            Period[which((dataset_P$t-shift.times.gaugings2$treal[z])<0)] <- z
+          }else if(z==nb_change_temp){
+            Period[which((dataset_P$t-shift.times.gaugings2$treal[z-1])>0)] <- z
+          }else{
+          
+            Period[between(dataset_P$t,shift.times.gaugings2$treal[z-1],shift.times.gaugings2$treal[z])] <- z
+          }
+        }
+        dataset_P_segmented <- cbind(dataset_P,
+                                     Period = Period)
+      }
+       
+    }else{
+      dataset_P_segmented <- cbind(dataset_P,
+                                   Period = seg.period)
+      
+    }
+    
+  
+    plot_p <- ggplot(dataset_P_segmented, aes(x=t,y=obs))+
+      geom_point(aes(col=factor(Period)))+
+      geom_errorbar(aes(ymin=obs-u,ymax=obs+u,col=factor(Period)),width=0.2)+
       geom_vline(xintercept = shift.times.gaugings2$treal,colour='#0b53c1',linetype='solid')+
-      theme_bw()
+      theme_bw()+
+      guides(color = guide_legend(title='Period'))
     
     for(i in 1:nrow(shift.times.gaugings2)){
       plot_p <- plot_p+geom_rect(mapping = aes_string(xmin = shift.times.gaugings2$t2[i], 
@@ -727,6 +770,8 @@ for(id_dataset in 1:length(datasets)){
     ggsave(file=paste0(dir_data_set,"/segmentation.png"))
   
     }else{
+      dataset_P_segmented <- cbind(dataset_P,
+                                   Period = seg.period)
       
       stable_mu_period  <- rbind(data.frame(muMAP  = mu.results.df[[1]]$mu.MAP,
                                             mu2    = mu.results.df[[1]]$mu.q2,
@@ -741,9 +786,9 @@ for(id_dataset in 1:length(datasets)){
       #===============================================================
       # Plots
       
-      plot_p <- ggplot(dataset_P, aes(x=t,y=obs))+
-        geom_point()+
-        geom_errorbar(aes(ymin=obs-u,ymax=obs+u),width=0.2)+
+      plot_p <- ggplot(dataset_P_segmented, aes(x=t,y=obs))+
+        geom_point(aes(col=factor(Period)))+
+        geom_errorbar(aes(ymin=obs-u,ymax=obs+u,col=factor(Period)),width=0.2)+
         geom_segment(mapping=aes_string(x    = sort(dataset_P$t)[1],
                                         xend = sort(dataset_P$t,decreasing =T)[1], 
                                         y    = stable_mu_period$muMAP, 
@@ -753,18 +798,34 @@ for(id_dataset in 1:length(datasets)){
                                        ymin = stable_mu_period$mu2,
                                        ymax = stable_mu_period$mu97),
                   fill = '#CB2027', alpha=0.005)+
-        theme_bw()
+        theme_bw()+
+        guides(color = guide_legend(title='Period'))
       
       ggsave(file=paste0(dir_data_set,"/segmentation.png"))
       
     }
   
+  plot_p_total [[id_dataset]] <-  plot_p
   T2<-Sys.time()
   Tdiff= difftime(T2,T1)
   write.table(Tdiff, file=paste0(dir_data_set,"/computing_time.txt"),row.names = F, col.names = F)
   
 }
 
+# Fusionner les tracés avec cowplot
+combined_plot <- plot_grid(plotlist = plot_p_total, ncol = 4)
+
+# Afficher le tracé combiné
+print(combined_plot)
+
+ggsave(file=file.path(dir_proj,dir_results,"global_segmentation.png"),
+       plot = combined_plot,
+       device = "tiff",
+       width = 450,
+       height = 300,
+       units = c('mm'),
+       dpi = 300
+       )
 
 
 
